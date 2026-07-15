@@ -23,7 +23,7 @@ public class EncoderDriveTrain extends LinearOpMode {
     public Servo outtakeLift;
     public RevTouchSensor touchSensor;
     private boolean isExtended = false;
-    int revolution = (int) 538/3;
+    int revolution = 145;
     @Override
     public void runOpMode() {
         FrontLeft = hardwareMap.get(DcMotor.class, "FL");
@@ -51,8 +51,11 @@ public class EncoderDriveTrain extends LinearOpMode {
         ExMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         ExMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         bucket.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        telemetry.addData("OpMode", "init");
+        telemetry.update();
         waitForStart();
         while (opModeIsActive()) {
+            telemetry.addData("OpMode", "started");
             double drive = -0.5*gamepad1.left_stick_y;
             double strafe = -0.5*gamepad1.left_stick_x;
             double turn = 0.5*gamepad1.right_stick_x;
@@ -60,6 +63,10 @@ public class EncoderDriveTrain extends LinearOpMode {
             FrontRight.setPower(drive-turn+strafe);
             BackLeft.setPower(drive+turn-strafe);
             BackRight.setPower(drive-turn-strafe);
+
+            telemetry.addData("touch sensor", touchSensor.isPressed());
+            telemetry.update();
+
 
             if (gamepad1.left_bumper && isExtended == true) {
                 retractProcess();
@@ -70,16 +77,23 @@ public class EncoderDriveTrain extends LinearOpMode {
 
             intake.setPower(gamepad1.right_trigger-gamepad1.left_trigger);
             if (gamepad1.dpad_up) {
-                leftServo.setPosition(0.75);
-                rightServo.setPosition(0.75);
+                leftServo.setPosition(0);
+                rightServo.setPosition(0);
                 /***
                  servo lift, outtake, servo close
                  ***/
             }
             if (gamepad1.dpad_down) {
-                leftServo.setPosition(0);
-                rightServo.setPosition(0);
+                leftServo.setPosition(0.75);
+                rightServo.setPosition(0.75);
             }
+            if (gamepad1.a){
+                latch.setPosition(0.16);
+            }
+            else if (gamepad1.b) {
+                latch.setPosition(0);
+            }
+            telemetry.update();
         }
     }
 
@@ -89,7 +103,7 @@ public class EncoderDriveTrain extends LinearOpMode {
          ***/
         bucket.setTargetPosition(bucket.getCurrentPosition() + (40));
 
-        bucket.setPower(0.3);
+        bucket.setPower(0.75 );
 
         bucket.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -101,7 +115,7 @@ public class EncoderDriveTrain extends LinearOpMode {
             bucket.setPower(0);
         }
 
-        latch.setPosition(0.16);
+        latch.setPosition(0);
 
         extension();
     }
@@ -125,11 +139,11 @@ public class EncoderDriveTrain extends LinearOpMode {
         }
     }
     private void extension() {
-        ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() - ((int) 4.5*revolution));
-        ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() - ((int) 4.5*revolution));
+        ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() - ((int) 4.7*revolution));
+        ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() - ((int) 4.7*revolution));
 
-        ExMotor1.setPower(0.2);
-        ExMotor2.setPower(0.2);
+        ExMotor1.setPower(0.5);
+        ExMotor2.setPower(0.5);
 
         ExMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         ExMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -150,6 +164,9 @@ public class EncoderDriveTrain extends LinearOpMode {
 //        ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() - (revolution));
 //        ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() - (revolution));
 
+        ExMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        ExMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         ExMotor1.setPower(1);
         ExMotor2.setPower(1);
 
@@ -164,25 +181,31 @@ public class EncoderDriveTrain extends LinearOpMode {
 //        }
 
         if (touchSensor.isPressed()) {
-            ExMotor1.setPower(0);
-            ExMotor2.setPower(0);
-            latch.setPosition(0);
-
             //unwind a little
-            ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() + (90));
-            ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() + (90));
+            double timeout = getRuntime() + 0.5;
+            if (timeout ==  getRuntime()) {
+                ExMotor1.setPower(0.1);
+                ExMotor2.setPower(0.1);
 
-            ExMotor1.setPower(0.1);
-            ExMotor2.setPower(0.1);
+                ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() + (90));
+                ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() + (90));
 
-            ExMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            ExMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                ExMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                ExMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            if ((ExMotor1.isBusy() || ExMotor2.isBusy())) {
-                telemetry.addLine("Unwinding a little");
+                if ((ExMotor1.isBusy() || ExMotor2.isBusy())) {
+                    telemetry.addLine("Unwinding a little");
+                } else {
+                    ExMotor1.setPower(0);
+                    ExMotor2.setPower(0);
+                }
             } else {
                 ExMotor1.setPower(0);
                 ExMotor2.setPower(0);
+                latch.setPosition(0.16);
+
+                ExMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                ExMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
         }
 
