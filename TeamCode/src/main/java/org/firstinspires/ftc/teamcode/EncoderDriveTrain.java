@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
 public class EncoderDriveTrain extends LinearOpMode {
+    public static final int THREE_TWELVE_MOTOR_REV = 538;
     public DcMotor FrontLeft;
     public DcMotor FrontRight;
     public DcMotor BackLeft;
@@ -24,11 +25,13 @@ public class EncoderDriveTrain extends LinearOpMode {
     public RevTouchSensor touchSensor;
     private boolean isExtended = false;
     private boolean touchWasPressed;
+    private boolean latchClosed;
     int revolution = 145;
 
     private double timer;
     @Override
     public void runOpMode() {
+        latchClosed = true;
         FrontLeft = hardwareMap.get(DcMotor.class, "FL");
         FrontRight = hardwareMap.get(DcMotor.class, "FR");
         BackLeft = hardwareMap.get(DcMotor.class, "BL");
@@ -54,11 +57,12 @@ public class EncoderDriveTrain extends LinearOpMode {
         ExMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         ExMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         bucket.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        telemetry.addData("OpMode", "init");
+
+        int bucketPosition = bucket.getCurrentPosition();
+        telemetry.addData("bucket", bucketPosition);
         telemetry.update();
         waitForStart();
         while (opModeIsActive()) {
-            telemetry.addData("OpMode", "started");
 
             double drive = -0.5*gamepad1.left_stick_y;
             double strafe = -0.5*gamepad1.left_stick_x;
@@ -82,23 +86,21 @@ public class EncoderDriveTrain extends LinearOpMode {
 
             if(touchSensor.isPressed() && !touchWasPressed){
                 latch.setPosition(0.16);
+                latchClosed = true;
                 timer = getRuntime() + 0.5;
             }
 
-            if(getRuntime() > timer){
-                telemetry.addData("timer", "complete");
-            }
-
-            if (latch.getPosition() == 0.16)
+            if (latchClosed)
             {
                 telemetry.addData("they both", "work");
             }
 
-            if(getRuntime() >= timer && latch.getPosition() == 0.16)
+            if (getRuntime() >= timer && latchClosed)
             {
                 telemetry.addData("if this doesnt print", "smthing is wrong");
                 ExMotor1.setPower(0);
                 ExMotor2.setPower(0);
+                //retractProcess();
             }
 
 
@@ -114,16 +116,39 @@ public class EncoderDriveTrain extends LinearOpMode {
                 /***
                  servo lift, outtake, servo close
                  ***/
+                timer = getRuntime() + 5.0;
+                if (timer - getRuntime() <= 0) {
+                    intake.setPower(0);
+                    outtakeLift.setPosition(0.05);
+                } else if (timer - getRuntime() <= 2.5) {
+                    intake.setPower(-1);
+                    outtakeLift.setPosition(0);
+                } else {
+                      telemetry.addData("waiting", "for timer");
+                }
             }
             if (gamepad1.dpad_down) {
-                leftServo.setPosition(0.75);
-                rightServo.setPosition(0.75);
+                leftServo.setPosition(0.7);
+                rightServo.setPosition(0.7);
             }
-            if (gamepad1.a){
-                latch.setPosition(0.16);
+            if (gamepad1.b){
+                outtakeLift.setPosition(0);
             }
-            else if (gamepad1.b) {
-                latch.setPosition(0);
+            else if (gamepad1.a) {
+                outtakeLift.setPosition(0.08);
+            }
+            if (gamepad1.y) {
+                bucket.setTargetPosition(bucketPosition + ((int) (0.5* THREE_TWELVE_MOTOR_REV)));
+
+                bucket.setPower(0.5);
+
+                bucket.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            } else if (gamepad1.x) {
+                bucket.setTargetPosition(bucketPosition);
+
+                bucket.setPower(0.5);
+
+                bucket.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
             telemetry.update();
             touchWasPressed = touchSensor.isPressed();
@@ -134,13 +159,9 @@ public class EncoderDriveTrain extends LinearOpMode {
         /***
          rb = turn motor little, move servo to 0.16, normal extension code
          ***/
-        bucket.setTargetPosition(bucket.getCurrentPosition() + (40));
-
-        bucket.setPower(0.75 );
-
-        bucket.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         latch.setPosition(0);
+        latchClosed = false;
 
         extension();
     }
@@ -148,31 +169,22 @@ public class EncoderDriveTrain extends LinearOpMode {
         /***
          lb = retract until button, servo turn, unwind a little, bucket down
          ***/
-        retraction();
-        bucket.setTargetPosition(bucket.getCurrentPosition() - (40));
+        //retraction();
+        bucket.setTargetPosition(bucket.getCurrentPosition() - ((int) (0.75*revolution)));
 
         bucket.setPower(0.3);
 
         bucket.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     private void extension() {
-        ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() - ((int) 4.7*revolution));
-        ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() - ((int) 4.7*revolution));
+        ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() - ((int) 4.6*revolution));
+        ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() - ((int) 4.6*revolution));
 
         ExMotor1.setPower(0.5);
         ExMotor2.setPower(0.5);
 
         ExMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         ExMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        if ((ExMotor1.isBusy()
-                || ExMotor2.isBusy())) {
-
-            telemetry.addLine("Extending");
-        } else {
-            ExMotor1.setPower(0);
-            ExMotor2.setPower(0);
-        }
 
         isExtended = true;
     }
@@ -186,16 +198,6 @@ public class EncoderDriveTrain extends LinearOpMode {
 
         ExMotor1.setPower(1);
         ExMotor2.setPower(1);
-
-//        ExMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        ExMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-//        if ((ExMotor1.isBusy() || ExMotor2.isBusy())) {
-//            telemetry.addLine("Retracting");
-//        } else {
-//            ExMotor1.setPower(0);
-//            ExMotor2.setPower(0);
-//        }
 
         if (touchSensor.isPressed()) {
             //unwind a little
