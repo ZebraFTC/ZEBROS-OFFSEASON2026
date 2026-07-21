@@ -87,7 +87,7 @@ public class EncoderDriveTrain extends LinearOpMode {
                 rightServo.setPosition(0);
             }
 
-            if(touchSensor.isPressed() && !touchWasPressed){
+            if(touchSensor.isPressed() && !touchWasPressed) {
                 ExMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 ExMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 ExMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -97,13 +97,7 @@ public class EncoderDriveTrain extends LinearOpMode {
                 timer = getRuntime() + 0.5;
             }
 
-            if (latchClosed)
-            {
-                telemetry.addData("they both", "work");
-            }
-
-            if (getRuntime() >= timer && latchClosed)
-            {
+            if (getRuntime() >= timer && latchClosed) {
                 telemetry.addData("if this doesnt print", "smthing is wrong");
                 ExMotor1.setPower(0);
                 ExMotor2.setPower(0);
@@ -182,8 +176,8 @@ public class EncoderDriveTrain extends LinearOpMode {
         ExMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         ExMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() - ((int) 4.65*revolution));
-        ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() - ((int) 4.65*revolution));
+        ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() - ((int) 4.7*revolution));
+        ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() - ((int) 4.7*revolution));
 
         ExMotor1.setPower(0.5);
         ExMotor2.setPower(0.5);
