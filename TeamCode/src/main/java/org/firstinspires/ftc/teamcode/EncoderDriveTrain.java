@@ -161,11 +161,13 @@ public class EncoderDriveTrain extends LinearOpMode {
          ***/
 
         latch.setPosition(0);
-        latchClosed = false;
-        leftServo.setPosition(0.7);
-        rightServo.setPosition(0.7);
+        if (latch.getPosition() < 0.1){
+            latchClosed = false;
+            leftServo.setPosition(0.7);
+            rightServo.setPosition(0.7);
+            extension();
+        }
 
-        extension();
     }
     private void retractProcess() {
         /***
