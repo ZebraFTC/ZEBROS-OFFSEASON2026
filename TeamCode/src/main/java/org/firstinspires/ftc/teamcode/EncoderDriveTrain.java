@@ -87,7 +87,7 @@ public class EncoderDriveTrain extends LinearOpMode {
                 rightServo.setPosition(0);
             }
 
-            if(touchSensor.isPressed() && !touchWasPressed) {
+            if (touchSensor.isPressed() && !touchWasPressed) {
                 ExMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 ExMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 ExMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -132,7 +132,7 @@ public class EncoderDriveTrain extends LinearOpMode {
                 outtakeLift.setPosition(0.08);
             }
             if (gamepad1.y) {
-                bucket.setTargetPosition(bucketPosition + ((int) (0.5* THREE_TWELVE_MOTOR_REV)));
+                bucket.setTargetPosition(bucketPosition + ((int) (0.55* THREE_TWELVE_MOTOR_REV)));
 
                 bucket.setPower(0.2);
 
