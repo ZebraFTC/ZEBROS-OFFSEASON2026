@@ -132,7 +132,7 @@ public class EncoderDriveTrain extends LinearOpMode {
                 outtakeLift.setPosition(0.08);
             }
             if (gamepad1.y) {
-                bucket.setTargetPosition(bucketPosition + ((int) (0.55* THREE_TWELVE_MOTOR_REV)));
+                bucket.setTargetPosition(bucketPosition + ((int) (0.65* THREE_TWELVE_MOTOR_REV)));
 
                 bucket.setPower(0.2);
 
