@@ -6,10 +6,16 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Mechanisms.DriveTrain;
 import org.firstinspires.ftc.teamcode.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.Mechanisms.Outtake;
 import org.firstinspires.ftc.teamcode.Mechanisms.Slides;
+
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLStatus;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 @TeleOp
 public class OpMode extends LinearOpMode {
@@ -17,9 +23,9 @@ public class OpMode extends LinearOpMode {
     public DcMotor frontRight;
     public DcMotor backLeft;
     public DcMotor backRight;
-    public  DcMotor leftMotor;
+    public DcMotor leftMotor;
     public DcMotor rightMotor;
-    public  DcMotor intake;
+    public DcMotor intake;
     public DcMotor bucket;
     public Servo leftServo;
     public Servo rightServo;
@@ -30,8 +36,10 @@ public class OpMode extends LinearOpMode {
     private boolean latchClosed;
     int revolution = 145;
     private double timer;
+    private Limelight3A limelight;
+
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
         latchClosed = true;
         frontLeft = hardwareMap.get(DcMotor.class, "FL");
         frontRight = hardwareMap.get(DcMotor.class, "FR");
@@ -55,13 +63,13 @@ public class OpMode extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-            double driveForward = -0.5*gamepad1.left_stick_y;
-            double strafeRight = -0.5*gamepad1.left_stick_x;
-            double turnCW = 0.5*gamepad1.right_stick_x;
+            double driveForward = -0.5 * gamepad1.left_stick_y;
+            double strafeRight = -0.5 * gamepad1.left_stick_x;
+            double turnCW = 0.5 * gamepad1.right_stick_x;
             driveTrain.drive(driveForward, strafeRight, turnCW);
 
             telemetry.addData("touch sensor", touchSensor.isPressed());
-            telemetry.addData("runtime",getRuntime());
+            telemetry.addData("runtime", getRuntime());
             telemetry.addData("latch position", latch.getPosition());
             telemetry.addData("Left Motor", leftMotor.getCurrentPosition());
             telemetry.addData("Right Motor", rightMotor.getCurrentPosition());
@@ -73,7 +81,7 @@ public class OpMode extends LinearOpMode {
                 slides.extend();
             }
 
-            double intakePower = gamepad1.right_trigger-gamepad1.left_trigger;
+            double intakePower = gamepad1.right_trigger - gamepad1.left_trigger;
             intakeClass.runIntake(intakePower);
 
             if (gamepad1.dpad_up) {
@@ -104,6 +112,25 @@ public class OpMode extends LinearOpMode {
 
             telemetry.update();
             touchWasPressed = touchSensor.isPressed();
+        }
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        telemetry.setMsTransmissionInterval(11);
+        limelight.pipelineSwitch(0);
+        limelight.start();
+
+        while (opModeIsActive()) {
+            LLResult result = limelight.getLatestResult();
+            if (result != null) {
+                if (result.isValid()) {
+                    telemetry.addData("April Tag Detected", 0);
+                    Pose3D botpose = result.getBotpose();
+                    telemetry.addData("tx", result.getTx());
+                    telemetry.addData("ty", result.getTy());
+                    telemetry.addData("Botpose", botpose.toString());
+                }
+            }
+
         }
     }
 }

@@ -64,9 +64,9 @@ public class EncoderDriveTrain extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
 
-            double drive = -0.5*gamepad1.left_stick_y;
-            double strafe = -0.5*gamepad1.left_stick_x;
-            double turn = 0.5*gamepad1.right_stick_x;
+            double drive = -0.8*gamepad1.left_stick_y;
+            double strafe = -0.8*gamepad1.left_stick_x;
+            double turn = 0.8*gamepad1.right_stick_x;
             FrontLeft.setPower(drive+turn+strafe);
             FrontRight.setPower(drive-turn+strafe);
             BackLeft.setPower(drive+turn-strafe);
@@ -132,7 +132,7 @@ public class EncoderDriveTrain extends LinearOpMode {
                 outtakeLift.setPosition(0.08);
             }
             if (gamepad1.y) {
-                bucket.setTargetPosition(bucketPosition + ((int) (0.55* THREE_TWELVE_MOTOR_REV)));
+                bucket.setTargetPosition(bucketPosition + ((int) (0.65* THREE_TWELVE_MOTOR_REV)));
 
                 bucket.setPower(0.2);
 
