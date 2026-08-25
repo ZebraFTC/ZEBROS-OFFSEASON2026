@@ -13,7 +13,7 @@ public class Practice extends LinearOpMode {
     public DcMotor backRight;
     private DcMotor SA;
     private DcMotor MA;
-    private DcMotor Bucket = null;
+    private DcMotor Bucket;
     private final int THREE_TWELVE_RESOLUTION = 538;
     private final int ARM_UP_TICKS = 450;
     private final int ARM_DOWN_TICKS = 0;
@@ -35,7 +35,6 @@ public class Practice extends LinearOpMode {
 
         Bucket = hardwareMap.get(DcMotor.class, "Bucket");
 
-        int SAPosition = SA.getCurrentPosition();
         waitForStart();
 
         while (opModeIsActive()){
@@ -53,13 +52,37 @@ public class Practice extends LinearOpMode {
             }
 
             if (gamepad1.b) {
-                SA.setTargetPosition(SAPosition);
+                //ideal position
+                MA.setTargetPosition(0);
+                MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                MA.setPower(0.7);
+                SA.setTargetPosition(0);
                 SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SA.setPower(0.5);
-            } else if (gamepad1.a){
-                SA.setTargetPosition(SAPosition-(15*THREE_TWELVE_RESOLUTION));
+                SA.setPower(0.7);
+            } else if (gamepad1.a) {
+                //intake position
+                MA.setTargetPosition(829);
+                MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                MA.setPower(0.7);
+                SA.setTargetPosition(1586);
                 SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SA.setPower(0.3);
+                SA.setPower(0.7);
+            } else if (gamepad1.x) {
+                //regular scoring
+                MA.setTargetPosition(5109);
+                MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                MA.setPower(0.7);
+                SA.setTargetPosition(-1282);
+                SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                SA.setPower(0.7);
+            } else if (gamepad1.y) {
+                //top bucket scoring
+                MA.setTargetPosition(3577);
+                MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                MA.setPower(0.7);
+                SA.setTargetPosition(144);
+                SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                SA.setPower(0.7);
             }
 
             telemetry.addData("MA Position", MA.getCurrentPosition());
