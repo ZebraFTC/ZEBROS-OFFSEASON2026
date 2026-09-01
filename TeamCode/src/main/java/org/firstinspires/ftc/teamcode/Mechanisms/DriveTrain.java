@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class DriveTrain extends Mechanism{
+public class DriveTrain extends Mechanism {
     private static final double DRIVE_TO_POWER = 0.5;
     DcMotor frontLeft;
     DcMotor frontRight;

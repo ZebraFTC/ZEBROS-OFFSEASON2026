@@ -29,18 +29,18 @@ public class Practice extends LinearOpMode {
         SA = hardwareMap.get(DcMotor.class, "SA" );
         DriveTrain driveTrain = new DriveTrain(frontLeft, frontRight, backLeft, backRight);
         MA.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        MA. setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        MA.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         SA.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        SA. setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        SA.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Bucket = hardwareMap.get(DcMotor.class, "Bucket");
 
         waitForStart();
 
         while (opModeIsActive()){
-            double driveForward = -0.5 * gamepad1.left_stick_y;
-            double strafeRight = -0.5 * gamepad1.left_stick_x;
-            double turnCW = 0.5 * gamepad1.right_stick_x;
+            double driveForward = -0.8 * gamepad1.left_stick_y;
+            double strafeRight = -0.8 * gamepad1.left_stick_x;
+            double turnCW = 0.8 * gamepad1.right_stick_x;
             driveTrain.drive(driveForward, strafeRight, turnCW);
 
             if (gamepad1.right_trigger > 0.1){
@@ -55,34 +55,50 @@ public class Practice extends LinearOpMode {
                 //ideal position
                 MA.setTargetPosition(0);
                 MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                MA.setPower(0.7);
+                MA.setPower(0.8);
                 SA.setTargetPosition(0);
                 SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SA.setPower(0.7);
+                SA.setPower(0.8);
             } else if (gamepad1.a) {
                 //intake position
                 MA.setTargetPosition(829);
                 MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                MA.setPower(0.7);
+                MA.setPower(0.8);
                 SA.setTargetPosition(1586);
                 SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SA.setPower(0.7);
+                SA.setPower(0.8);
             } else if (gamepad1.x) {
                 //regular scoring
-                MA.setTargetPosition(5109);
+                MA.setTargetPosition(5172);
                 MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                MA.setPower(0.7);
-                SA.setTargetPosition(-1282);
+                MA.setPower(0.8);
+                SA.setTargetPosition(-1053);
                 SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SA.setPower(0.7);
+                SA.setPower(0.8);
             } else if (gamepad1.y) {
-                //top bucket scoring
-                MA.setTargetPosition(3577);
+                //top bucket scoring red
+                MA.setTargetPosition(3408);
                 MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                MA.setPower(0.7);
-                SA.setTargetPosition(144);
+                MA.setPower(0.8);
+                SA.setTargetPosition(120);
                 SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SA.setPower(0.7);
+                SA.setPower(0.8);
+            } else if (gamepad1.left_bumper) {
+                //straight scoring
+                MA.setTargetPosition(1768);
+                MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                MA.setPower(0.8);
+                SA.setTargetPosition(1055);
+                SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                SA.setPower(0.8);
+            } else if (gamepad1.right_bumper) {
+                //top bucket scoring blue
+                MA.setTargetPosition(3522);
+                MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                MA.setPower(0.8);
+                SA.setTargetPosition(583);
+                SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                SA.setPower(0.8);
             }
 
             telemetry.addData("MA Position", MA.getCurrentPosition());
