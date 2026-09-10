@@ -51,7 +51,7 @@ public class Practice extends LinearOpMode {
                 Bucket.setPower(0.0);
             }
 
-            if (gamepad1.b) {
+            if (gamepad2.b) {
                 //ideal position
                 MA.setTargetPosition(0);
                 MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -59,7 +59,7 @@ public class Practice extends LinearOpMode {
                 SA.setTargetPosition(0);
                 SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 SA.setPower(0.8);
-            } else if (gamepad1.a) {
+            } else if (gamepad2.a) {
                 //intake position
                 MA.setTargetPosition(829);
                 MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -67,7 +67,7 @@ public class Practice extends LinearOpMode {
                 SA.setTargetPosition(1586);
                 SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 SA.setPower(0.8);
-            } else if (gamepad1.x) {
+            } else if (gamepad2.x) {
                 //regular scoring
                 MA.setTargetPosition(5172);
                 MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -75,7 +75,7 @@ public class Practice extends LinearOpMode {
                 SA.setTargetPosition(-1053);
                 SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 SA.setPower(0.8);
-            } else if (gamepad1.y) {
+            } else if (gamepad2.y) {
                 //top bucket scoring red
                 MA.setTargetPosition(3408);
                 MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -83,7 +83,7 @@ public class Practice extends LinearOpMode {
                 SA.setTargetPosition(120);
                 SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 SA.setPower(0.8);
-            } else if (gamepad1.left_bumper) {
+            } else if (gamepad2.left_bumper) {
                 //straight scoring
                 MA.setTargetPosition(1768);
                 MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -91,7 +91,7 @@ public class Practice extends LinearOpMode {
                 SA.setTargetPosition(1055);
                 SA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 SA.setPower(0.8);
-            } else if (gamepad1.right_bumper) {
+            } else if (gamepad2.right_bumper) {
                 //top bucket scoring blue
                 MA.setTargetPosition(3522);
                 MA.setMode(DcMotor.RunMode.RUN_TO_POSITION);
