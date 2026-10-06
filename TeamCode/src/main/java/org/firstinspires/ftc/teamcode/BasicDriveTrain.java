@@ -28,9 +28,9 @@ public class BasicDriveTrain extends LinearOpMode {
             double strafe = -0.8 * gamepad1.left_stick_x;
             double turn = 0.8 * gamepad1.right_stick_x;
             FrontLeft.setPower(drive + turn + strafe);
-            FrontRight.setPower(drive - turn + strafe);
+            FrontRight.setPower(drive - turn - strafe);
             BackLeft.setPower(drive + turn - strafe);
-            BackRight.setPower(drive - turn - strafe);
+            BackRight.setPower(drive - turn + strafe);
 
 
         }

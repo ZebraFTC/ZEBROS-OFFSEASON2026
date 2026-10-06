@@ -31,9 +31,9 @@ public class DriveTrain extends Mechanism{
         strafeRight *= MAX_SPEED;
         turnCW *= MAX_SPEED;
         frontLeft.setPower(driveForward+turnCW+strafeRight);
-        frontRight.setPower(driveForward-turnCW+strafeRight);
+        frontRight.setPower(driveForward-turnCW-strafeRight);
         backLeft.setPower(driveForward+turnCW-strafeRight);
-        backRight.setPower(driveForward-turnCW-strafeRight);
+        backRight.setPower(driveForward-turnCW+strafeRight);
     }
     @Override
     public void update(double time) {}
