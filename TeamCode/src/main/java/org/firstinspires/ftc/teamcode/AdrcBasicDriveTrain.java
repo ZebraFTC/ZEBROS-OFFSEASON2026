@@ -15,11 +15,37 @@ public class AdrcBasicDriveTrain extends LinearOpMode {
                 hardwareMap.get(DcMotorEx.class, "FR"),
                 hardwareMap.get(DcMotorEx.class, "BL"),
                 hardwareMap.get(DcMotorEx.class, "BR"));
-
+        double WC = AdrcDriveTrain.WC;
+        double WO = AdrcDriveTrain.WO;
         waitForStart();
         while (opModeIsActive()) {
+            //Tuning code
+            //use y and b for WC and x and a for WO
+            /*
+            if (gamepad1.y) {
+                WC += 0.5;
+                sleep(200);
+            }
+            if (gamepad1.b) {
+                WC -= 0.5;
+                sleep(200);
+            }
+            if (gamepad1.x) {
+                WO += 0.5;
+                sleep(200);
+            }
+            if (gamepad1.a) {
+                WO -= 0.5;
+                sleep(200);
+            }
+
+            telemetry.addData("WC value", WC);
+            telemetry.addData("WO value", WO);
+            telemetry.update();
+
+             */
             double drive  = -gamepad1.left_stick_y;
-            double strafe = -gamepad1.left_stick_x;   // kept from your original code
+            double strafe = -gamepad1.left_stick_x;
             double turn   =  gamepad1.right_stick_x;
             driveTrain.drive(drive, strafe, turn);
         }

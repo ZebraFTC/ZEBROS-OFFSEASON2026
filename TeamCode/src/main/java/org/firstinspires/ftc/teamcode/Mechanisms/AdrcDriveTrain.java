@@ -15,8 +15,8 @@ public class AdrcDriveTrain extends Mechanism {
 
     // ---- ADRC tuning ----
     private static final double MOTOR_TAU = 0.10;  // approx. motor time constant (s)
-    private static final double WC = 20.0;         // controller bandwidth (rad/s)
-    private static final double WO = 60.0;         // observer bandwidth (rad/s), about 3x WC
+    public static double WC = 10.0;         // controller bandwidth (rad/s)
+    public static double WO = 20.0;         // observer bandwidth (rad/s), about 3x WC
 
     private final DcMotorEx frontLeft, frontRight, backLeft, backRight;
     private final AdrcController flCtrl, frCtrl, blCtrl, brCtrl;
