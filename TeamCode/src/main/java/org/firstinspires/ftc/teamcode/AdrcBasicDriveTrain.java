@@ -14,12 +14,12 @@ import org.firstinspires.ftc.teamcode.LimelightHandler;
 public class AdrcBasicDriveTrain extends LinearOpMode {
     @Override
     public void runOpMode() {
-        LimelightHandler.setupLimelight(hardwareMap, "limelight", 0);
+        //LimelightHandler.setupLimelight(hardwareMap, "limelight", 0);
         waitForStart();
         while (opModeIsActive()) {
             // get info from limeLight cam
-            LLResult result = LimelightHandler.grabInformation();
-
+            //LLResult result = LimelightHandler.grabInformation();
+            /*
             if (result != null && result.isValid()) {
                 java.util.List<com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult> aprilTags = result.getFiducialResults();
 
@@ -39,25 +39,19 @@ public class AdrcBasicDriveTrain extends LinearOpMode {
             }
         }
 
+             */
 
-
-        /*
-        AdrcDriveTrain driveTrain = new AdrcDriveTrain(
-                hardwareMap.get(DcMotorEx.class, "FL"),
-                hardwareMap.get(DcMotorEx.class, "FR"),
-                hardwareMap.get(DcMotorEx.class, "BL"),
-                hardwareMap.get(DcMotorEx.class, "BR"));
-        double WC = AdrcDriveTrain.WC;
-        double WO = AdrcDriveTrain.WO;
-
-         */
-
-
-
+            AdrcDriveTrain driveTrain = new AdrcDriveTrain(
+                    hardwareMap.get(DcMotorEx.class, "FL"),
+                    hardwareMap.get(DcMotorEx.class, "FR"),
+                    hardwareMap.get(DcMotorEx.class, "BL"),
+                    hardwareMap.get(DcMotorEx.class, "BR"));
+            double WC = AdrcDriveTrain.WC;
+            double WO = AdrcDriveTrain.WO;
 
             //Tuning code
             //use y and b for WC and x and a for WO
-            /*
+
             if (gamepad1.y) {
                 WC += 0.5;
                 sleep(200);
@@ -79,14 +73,12 @@ public class AdrcBasicDriveTrain extends LinearOpMode {
             telemetry.addData("WO value", WO);
             telemetry.update();
 
-
-            double drive  = -gamepad1.left_stick_y;
+            double drive = -gamepad1.left_stick_y;
             double strafe = -gamepad1.left_stick_x;
-            double turn   =  gamepad1.right_stick_x;
+            double turn = gamepad1.right_stick_x;
             driveTrain.drive(drive, strafe, turn);
-
-             */
         }
     }
+}
 
 
