@@ -4,7 +4,11 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
 
 import org.firstinspires.ftc.teamcode.Mechanisms.AdrcDriveTrain;
 import org.firstinspires.ftc.teamcode.LimelightHandler;
@@ -12,11 +16,24 @@ import org.firstinspires.ftc.teamcode.LimelightHandler;
 
 @TeleOp
 public class AdrcBasicDriveTrain extends LinearOpMode {
+    public DcMotor intake;
+    public DcMotor transfer;
+    public DcMotor shooter;
+    public Servo ramp;
+
     @Override
     public void runOpMode() {
         //LimelightHandler.setupLimelight(hardwareMap, "limelight", 0);
         waitForStart();
         while (opModeIsActive()) {
+            intake = hardwareMap.get(DcMotor.class, "Intake");
+            transfer = hardwareMap.get(DcMotor.class, "Transfer");
+            shooter = hardwareMap.get(DcMotor.class, "Shooter");
+            ramp = hardwareMap.get(Servo.class, "Ramp");
+
+            shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+            transfer.setDirection(DcMotorSimple.Direction.REVERSE);
+
             // get info from limeLight cam
             //LLResult result = LimelightHandler.grabInformation();
             /*
@@ -38,9 +55,7 @@ public class AdrcBasicDriveTrain extends LinearOpMode {
                 }
             }
         }
-
              */
-
             AdrcDriveTrain driveTrain = new AdrcDriveTrain(
                     hardwareMap.get(DcMotorEx.class, "FL"),
                     hardwareMap.get(DcMotorEx.class, "FR"),
@@ -49,34 +64,33 @@ public class AdrcBasicDriveTrain extends LinearOpMode {
             double WC = AdrcDriveTrain.WC;
             double WO = AdrcDriveTrain.WO;
 
-            //Tuning code
-            //use y and b for WC and x and a for WO
-
-            if (gamepad1.y) {
-                WC += 0.5;
-                sleep(200);
-            }
-            if (gamepad1.b) {
-                WC -= 0.5;
-                sleep(200);
-            }
-            if (gamepad1.x) {
-                WO += 0.5;
-                sleep(200);
-            }
-            if (gamepad1.a) {
-                WO -= 0.5;
-                sleep(200);
-            }
-
-            telemetry.addData("WC value", WC);
-            telemetry.addData("WO value", WO);
-            telemetry.update();
-
             double drive = -gamepad1.left_stick_y;
             double strafe = -gamepad1.left_stick_x;
             double turn = gamepad1.right_stick_x;
             driveTrain.drive(drive, strafe, turn);
+
+            if (gamepad1.right_trigger_pressed) {
+                intake.setPower(.8);
+                transfer.setPower(.8);
+            } else if (gamepad1.left_trigger_pressed) {
+                intake.setPower(-.8);
+                transfer.setPower(-.8);
+            } else {
+                intake.setPower(0);
+                transfer.setPower(0);
+            }
+            if (gamepad1.dpad_up) {
+                shooter.setPower(.5);
+            }
+            if (gamepad1.dpad_down) {
+                shooter.setPower(0);
+            }
+            if (gamepad1.a) {
+                ramp.setPosition(0);
+            }
+            if (gamepad1.b) {
+                ramp.setPosition(.8);
+            }
         }
     }
 }
