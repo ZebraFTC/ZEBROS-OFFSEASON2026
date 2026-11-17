@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-package org.firstinspires.ftc.teamcode.net.frogbots.opmodes.Extended.utils;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -28,7 +28,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
 @TeleOp(name="PID test 2", group="utils")
-public class PIDtest2 extends LinearOpMode
+public class pidtuner extends LinearOpMode
 {
     private double p, i, d;
     private PidUdpReceiver pidUdpReceiver;

@@ -11,7 +11,7 @@ public class LimelightHandler {
     private static Limelight3A limelight;
 
     public LimelightHandler() {
-        // Does nothing until setupLimelight is called
+
     }
     public static void setupLimelight(HardwareMap hardwareMap, String deviceName, int initialPipeline) {
         limelight = hardwareMap.get(Limelight3A.class, deviceName);
