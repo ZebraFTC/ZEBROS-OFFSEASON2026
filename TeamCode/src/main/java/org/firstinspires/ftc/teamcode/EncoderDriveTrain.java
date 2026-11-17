@@ -1,233 +1,137 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
 public class EncoderDriveTrain extends LinearOpMode {
-    public static final int THREE_TWELVE_MOTOR_REV = 538;
-    public DcMotor FrontLeft;
-    public DcMotor FrontRight;
-    public DcMotor BackLeft;
-    public DcMotor BackRight;
-    public DcMotor ExMotor2;
-    public  DcMotor ExMotor1;
-    public  DcMotor intake;
-    public DcMotor bucket;
-    public Servo leftServo;
-    public Servo rightServo;
-    public Servo latch;
-    public Servo outtakeLift;
-    public RevTouchSensor touchSensor;
-    private boolean isExtended = false;
-    private boolean touchWasPressed;
-    private boolean latchClosed;
-    int revolution = 145;
+    public double MovePower;
 
-    private double timer;
+    public double ShootSpeed;
+    public DcMotorEx FrontLeft;
+    public DcMotorEx FrontRight;
+    public DcMotorEx BackLeft;
+    public DcMotorEx BackRight;
+    public Servo flap;
+    public DcMotor intake;
+    public DcMotor transfer;
+    public DcMotorEx shooter;
+    public Servo ramp;
+
+
     @Override
     public void runOpMode() {
-        latchClosed = true;
-        FrontLeft = hardwareMap.get(DcMotor.class, "FL");
-        FrontRight = hardwareMap.get(DcMotor.class, "FR");
-        BackLeft = hardwareMap.get(DcMotor.class, "BL");
-        BackRight = hardwareMap.get(DcMotor.class, "BR");
-        ExMotor2 = hardwareMap.get(DcMotor.class, "RE");
-        ExMotor1 = hardwareMap.get(DcMotor.class, "EX");
-        intake = hardwareMap.get(DcMotor.class, "intake");
-        bucket = hardwareMap.get(DcMotor.class, "bucket");
-        leftServo = hardwareMap.get(Servo.class, "LS");
-        rightServo = hardwareMap.get(Servo.class, "RS");
-        latch = hardwareMap.get(Servo.class, "latch");
-        outtakeLift = hardwareMap.get(Servo.class, "OL");
-        touchSensor = hardwareMap.get(RevTouchSensor.class, "touch");
+        MovePower = .95;
+        ShootSpeed = 0.25;
+        intake = hardwareMap.get(DcMotor.class, "Intake");
+        transfer = hardwareMap.get(DcMotor.class, "Transfer");
+        shooter = hardwareMap.get(DcMotorEx.class, "Shooter");
+        ramp = hardwareMap.get(Servo.class, "Ramp");
+        flap = hardwareMap.get(Servo.class, "Flap");
+
+        shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        FrontLeft = hardwareMap.get(DcMotorEx.class, "FL");
+        FrontRight = hardwareMap.get(DcMotorEx.class, "FR");
+        BackLeft = hardwareMap.get(DcMotorEx.class, "BL");
+        BackRight = hardwareMap.get(DcMotorEx.class, "BR");
+
+        FrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        FrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        FrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         FrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         BackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        ExMotor2.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftServo.setDirection(Servo.Direction.REVERSE);
 
-        ExMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        ExMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bucket.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        ramp.setPosition(.8);
 
-        ExMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        ExMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bucket.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        int bucketPosition = bucket.getCurrentPosition();
-        telemetry.addData("bucket", bucketPosition);
-        telemetry.update();
         waitForStart();
         while (opModeIsActive()) {
 
-            double drive = -0.8*gamepad1.left_stick_y;
-            double strafe = -0.8*gamepad1.left_stick_x;
-            double turn = 0.8*gamepad1.right_stick_x;
-            FrontLeft.setPower(drive+turn+strafe);
-            FrontRight.setPower(drive-turn+strafe);
-            BackLeft.setPower(drive+turn-strafe);
-            BackRight.setPower(drive-turn-strafe);
+            double drive = -0.8 * gamepad1.left_stick_y;
+            double strafe = -1.7 * gamepad1.left_stick_x;
+            double turn = 0.8 * gamepad1.right_stick_x;
+            float FLPower = (float) (drive + turn + strafe);
+            float FRPower = (float) (drive - turn - strafe);
+            float BLPower = (float) (drive + turn - strafe);
+            float BRPower = (float) (drive - turn + strafe);
 
-            telemetry.addData("touch sensor", touchSensor.isPressed());
-            telemetry.addData("runtime",getRuntime());
-            telemetry.addData("latch position", latch.getPosition());
-            telemetry.addData("ExMotor1", ExMotor1.getCurrentPosition());
-            telemetry.addData("ExMotor2", ExMotor2.getCurrentPosition());
-
-            if (gamepad1.left_bumper) {
-                ExMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                ExMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                ExMotor1.setPower(1);
-                ExMotor2.setPower(1);
-                leftServo.setPosition(0);
-                rightServo.setPosition(0);
-            }
-
-            if (touchSensor.isPressed() && !touchWasPressed) {
-                ExMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                ExMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                ExMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                ExMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                latch.setPosition(0.16);
-                latchClosed = true;
-                timer = getRuntime() + 0.5;
-            }
-
-            if (getRuntime() >= timer && latchClosed) {
-                telemetry.addData("if this doesnt print", "smthing is wrong");
-                ExMotor1.setPower(0);
-                ExMotor2.setPower(0);
-                //retractProcess();
-            }
+            FrontLeft.setPower(FLPower * MovePower);
+            FrontRight.setPower(FRPower * MovePower);
+            BackLeft.setPower(BLPower * MovePower);
+            BackRight.setPower(BRPower * MovePower);
 
 
-            if (gamepad1.right_bumper) {
-                extendProcess();
-            }
-
-            intake.setPower(gamepad1.right_trigger-gamepad1.left_trigger);
-            if (gamepad1.dpad_up) {
-                outtakeLift.setPosition(0.1);
-                intake.setPower(-1);
-            }
-            if (gamepad1.dpad_down) {
-                outtakeLift.setPosition(0);
+            if (gamepad2.right_trigger_pressed) {
+                intake.setPower(1);
+                transfer.setPower(1);
+            } else if (gamepad2.left_trigger_pressed) {
+                intake.setPower(-.8);
+                transfer.setPower(-.8);
+            } else if (gamepad2.y) {
+                intake.setPower(.25);
+            } else {
                 intake.setPower(0);
+                transfer.setPower(0);
+            }
+
+            if (gamepad2.right_bumper) {
+                shooter.setPower(ShootSpeed);
+            }
+
+            if (gamepad2.left_bumper) {
+                shooter.setPower(0);
+            }
+            if (gamepad2.dpad_right) {
+                ShootSpeed = .3;
+            }
+            if (gamepad2.dpad_left) {
+                ShootSpeed = .35;
+            }
+            if (gamepad2.dpad_up) {
+                ShootSpeed = .4;
+            }
+            if (gamepad2.dpad_down) {
+                ShootSpeed = .15;
+            }
+            if (gamepad2.a) {
+                flap.setPosition(0);
+            }
+            if (gamepad2.b) {
+                flap.setPosition(.3);
+            }
+            if (gamepad1.a) {
+                ramp.setPosition(0);
+            }
+            if (gamepad1.b) {
+                ramp.setPosition(.8);
+            }
+            if (gamepad1.dpad_up) {
+                MovePower = 1.25;
             }
             if (gamepad1.dpad_left) {
-                leftServo.setPosition(0);
-                rightServo.setPosition(0);
-            } else if (gamepad1.dpad_right) {
-                leftServo.setPosition(0.7);
-                rightServo.setPosition(0.7);
+                MovePower = .95;
             }
-            if (gamepad1.b){
-                outtakeLift.setPosition(0);
+            if (gamepad1.dpad_down){
+                MovePower = .7;
             }
-            else if (gamepad1.a) {
-                outtakeLift.setPosition(0.08);
-            }
-            if (gamepad1.y) {
-                bucket.setTargetPosition(bucketPosition + ((int) (0.65* THREE_TWELVE_MOTOR_REV)));
-
-                bucket.setPower(0.2);
-
-                bucket.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            } else if (gamepad1.x) {
-                bucket.setTargetPosition(bucketPosition);
-
-                bucket.setPower(0.2);
-
-                bucket.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            }
+            telemetry.addData("Shoot Power",String.valueOf(ShootSpeed));
+            telemetry.addData("Move Power",String.valueOf(MovePower));
             telemetry.update();
-            touchWasPressed = touchSensor.isPressed();
+
         }
-    }
-
-    private void extendProcess() {
-        /***
-         rb = turn motor little, move servo to 0.16, normal extension code
-         ***/
-
-        latch.setPosition(0);
-        if (latch.getPosition() < 0.1){
-            latchClosed = false;
-            leftServo.setPosition(0.7);
-            rightServo.setPosition(0.7);
-            extension();
-        }
-
-    }
-    private void retractProcess() {
-        /***
-         lb = retract until button, servo turn, unwind a little, bucket down
-         ***/
-        //retraction();
-        bucket.setTargetPosition(bucket.getCurrentPosition() - ((int) (0.75*revolution)));
-
-        bucket.setPower(0.3);
-
-        bucket.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-    private void extension() {
-        ExMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        ExMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() - ((int) 4.7*revolution));
-        ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() - ((int) 4.7*revolution));
-
-        ExMotor1.setPower(0.5);
-        ExMotor2.setPower(0.5);
-
-        ExMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        ExMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        isExtended = true;
-
-
-    }
-
-    private void retraction() {
-//        ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() - (revolution));
-//        ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() - (revolution));
-
-        ExMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ExMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        ExMotor1.setPower(1);
-        ExMotor2.setPower(1);
-
-        if (touchSensor.isPressed()) {
-            //unwind a little
-            double timeout = getRuntime() + 0.5;
-            if (timeout ==  getRuntime()) {
-                ExMotor1.setPower(0.1);
-                ExMotor2.setPower(0.1);
-
-                ExMotor1.setTargetPosition(ExMotor1.getCurrentPosition() + (90));
-                ExMotor2.setTargetPosition(ExMotor2.getCurrentPosition() + (90));
-
-                ExMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                ExMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                if ((ExMotor1.isBusy() || ExMotor2.isBusy())) {
-                    telemetry.addLine("Unwinding a little");
-                } else {
-                    ExMotor1.setPower(0);
-                    ExMotor2.setPower(0);
-                }
-            } else {
-                latch.setPosition(0.16);
-
-                ExMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                ExMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            }
-        }
-        isExtended = false;
     }
 }
