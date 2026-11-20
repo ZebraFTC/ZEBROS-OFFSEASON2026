@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import org.firstinspires.ftc.teamcode.Mechanisms.ADRC_driver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,23 +11,19 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class EncoderDriveTrain extends LinearOpMode {
     public double MovePower;
-
-    public double ShootSpeed;
-    public DcMotorEx FrontLeft;
-    public DcMotorEx FrontRight;
-    public DcMotorEx BackLeft;
-    public DcMotorEx BackRight;
-    public Servo flap;
-    public DcMotor intake;
-    public DcMotor transfer;
+    boolean shoot;
+    public double targetShootRPM;
+    public DcMotorEx FrontLeft, FrontRight, BackLeft, BackRight;
+    public Servo flap, ramp;
+    public DcMotor intake, transfer;
     public DcMotorEx shooter;
-    public Servo ramp;
-
 
     @Override
     public void runOpMode() {
+        shoot = false;
         MovePower = .95;
-        ShootSpeed = 0.25;
+        targetShootRPM = 1000.0; // Default ticks/sec
+
         intake = hardwareMap.get(DcMotor.class, "Intake");
         transfer = hardwareMap.get(DcMotor.class, "Transfer");
         shooter = hardwareMap.get(DcMotorEx.class, "Shooter");
@@ -45,8 +42,7 @@ public class EncoderDriveTrain extends LinearOpMode {
         FrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         BackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         BackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         FrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -58,9 +54,24 @@ public class EncoderDriveTrain extends LinearOpMode {
 
         ramp.setPosition(.8);
 
-        waitForStart();
-        while (opModeIsActive()) {
+        ADRC_driver shooter_adrc = new ADRC_driver(
+                4000.0, // b0: tune based on flywheel acceleration
+                40.0,   // omegaO: observer bandwidth
+                10.0    // omegaC: controller bandwidth
+        );
 
+        waitForStart();
+
+        // Initialize timer and observer AFTER waitForStart()
+        long lastTimeNanos = System.nanoTime();
+        shooter_adrc.reset(shooter.getVelocity());
+
+        while (opModeIsActive()) {
+            long now = System.nanoTime();
+            double dt = (now - lastTimeNanos) / 1e9;
+            lastTimeNanos = now;
+
+            // --- Drivetrain ---
             double drive = -0.8 * gamepad1.left_stick_y;
             double strafe = -1.7 * gamepad1.left_stick_x;
             double turn = 0.8 * gamepad1.right_stick_x;
@@ -74,11 +85,21 @@ public class EncoderDriveTrain extends LinearOpMode {
             BackLeft.setPower(BLPower * MovePower);
             BackRight.setPower(BRPower * MovePower);
 
+            // --- ADRC Shooter Velocity Control ---
+            double currentVelocity = shooter.getVelocity();
+            if (shoot) {
+                double motorPower = shooter_adrc.calculate((targetShootRPM/60.0)*28.0, currentVelocity, dt);
+                shooter.setPower(motorPower);
+            } else {
+                shooter.setPower(0);
+                shooter_adrc.reset(currentVelocity); // Prevent windup while off
+            }
 
-            if (gamepad2.right_trigger_pressed) {
+            // --- Intake & Transfer (Fixed trigger syntax) ---
+            if (gamepad2.right_trigger > 0.5) {
                 intake.setPower(1);
                 transfer.setPower(1);
-            } else if (gamepad2.left_trigger_pressed) {
+            } else if (gamepad2.left_trigger > 0.5) {
                 intake.setPower(-.8);
                 transfer.setPower(-.8);
             } else if (gamepad2.y) {
@@ -88,50 +109,29 @@ public class EncoderDriveTrain extends LinearOpMode {
                 transfer.setPower(0);
             }
 
-            if (gamepad2.right_bumper) {
-                shooter.setPower(ShootSpeed);
-            }
+            // --- Shooter Toggle & Speed Presets (in ticks/sec) ---
+            if (gamepad2.right_bumper) shoot = true;
+            if (gamepad2.left_bumper) shoot = false;
 
-            if (gamepad2.left_bumper) {
-                shooter.setPower(0);
-            }
-            if (gamepad2.dpad_right) {
-                ShootSpeed = .3;
-            }
-            if (gamepad2.dpad_left) {
-                ShootSpeed = .35;
-            }
-            if (gamepad2.dpad_up) {
-                ShootSpeed = .4;
-            }
-            if (gamepad2.dpad_down) {
-                ShootSpeed = .15;
-            }
-            if (gamepad2.a) {
-                flap.setPosition(0);
-            }
-            if (gamepad2.b) {
-                flap.setPosition(.3);
-            }
-            if (gamepad1.a) {
-                ramp.setPosition(0);
-            }
-            if (gamepad1.b) {
-                ramp.setPosition(.8);
-            }
-            if (gamepad1.dpad_up) {
-                MovePower = 1.25;
-            }
-            if (gamepad1.dpad_left) {
-                MovePower = .95;
-            }
-            if (gamepad1.dpad_down){
-                MovePower = .7;
-            }
-            telemetry.addData("Shoot Power",String.valueOf(ShootSpeed));
-            telemetry.addData("Move Power",String.valueOf(MovePower));
+            if (gamepad2.dpad_down)  targetShootRPM = 1000.0;
+            if (gamepad2.dpad_right) targetShootRPM = 2300.0;
+            if (gamepad2.dpad_left)  targetShootRPM = 3000.0;
+            if (gamepad2.dpad_up)    targetShootRPM = 4000.0;
+
+            // --- Servos & Drive Speed ---
+            if (gamepad2.a) flap.setPosition(0);
+            if (gamepad2.b) flap.setPosition(.3);
+            if (gamepad1.a) ramp.setPosition(0);
+            if (gamepad1.b) ramp.setPosition(.8);
+
+            if (gamepad1.dpad_up) MovePower = 1.25;
+            if (gamepad1.dpad_left) MovePower = .95;
+            if (gamepad1.dpad_down) MovePower = .7;
+
+            telemetry.addData("Shooter Active", shoot);
+            telemetry.addData("Target vs Actual Vel", "%.0f / %.0f", targetShootRPM, currentVelocity);
+            telemetry.addData("Move Power", MovePower);
             telemetry.update();
-
         }
     }
 }
