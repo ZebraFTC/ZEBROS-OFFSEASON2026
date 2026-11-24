@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Mechanisms.ADRC_driver;
+import org.firstinspires.ftc.teamcode.Mechanisms.Camera;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,9 +10,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import java.util.Map;
+
+
 @TeleOp
 public class EncoderDriveTrain extends LinearOpMode {
     public double MovePower;
+    private Camera camera;
     boolean shoot;
     public double targetShootRPM;
     public DcMotorEx FrontLeft, FrontRight, BackLeft, BackRight;
@@ -20,6 +26,8 @@ public class EncoderDriveTrain extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
+
         shoot = false;
         MovePower = .95;
         targetShootRPM = 1000.0; // Default ticks/sec
@@ -54,6 +62,9 @@ public class EncoderDriveTrain extends LinearOpMode {
 
         ramp.setPosition(.8);
 
+        camera = new Camera(hardwareMap, 0);
+        camera.start();
+
         ADRC_driver shooter_adrc = new ADRC_driver(
                 4000.0, // b0: tune based on flywheel acceleration
                 40.0,   // omegaO: observer bandwidth
@@ -67,6 +78,12 @@ public class EncoderDriveTrain extends LinearOpMode {
         shooter_adrc.reset(shooter.getVelocity());
 
         while (opModeIsActive()) {
+
+            Map<Integer, double[]> tags2D = camera.getTagInfo2D();
+            Map<Integer, Pose3D> tags3D = camera.getTagInfo3D();
+
+
+
             long now = System.nanoTime();
             double dt = (now - lastTimeNanos) / 1e9;
             lastTimeNanos = now;
@@ -131,6 +148,8 @@ public class EncoderDriveTrain extends LinearOpMode {
             telemetry.addData("Shooter Active", shoot);
             telemetry.addData("Target vs Actual Vel", "%.0f / %.0f", targetShootRPM, currentVelocity);
             telemetry.addData("Move Power", MovePower);
+            telemetry.addData("2D",tags2D);
+            telemetry.addData("3D",tags3D);
             telemetry.update();
         }
     }
